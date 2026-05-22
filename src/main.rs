@@ -34,10 +34,10 @@ fn language(path: &'static str) -> Result<&'static str, Box<dyn std::error::Erro
             continue;
         }
     }
-    if !lang.eq("") {
-        Ok(lang)
-    } else {
+    if lang.is_empty() {
         Err("language not identified".into())
+    } else {
+        Ok(lang)
     }
 }
 fn main() {
