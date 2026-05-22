@@ -1,20 +1,25 @@
 use std::collections::HashMap;
 use std::fs;
+// linguagens suportadas atualmente = Go, Rust
 struct DependencyManagers<'a> {
     dependency_managers: HashMap<&'a str, &'a str>,
 }
 impl<'a> DependencyManagers<'a> {
     fn new() -> Self {
         Self {
-            dependency_managers: HashMap::new(),
+            // instanciando com capacidade 2 devido à quantidade de linguagens suportadas atualmente
+            dependency_managers: HashMap::with_capacity(2),
         }
     }
 }
-fn language() -> Result<&'static str, Box<dyn std::error::Error>> {
+
+// função que recebe uma str para indicar o caminho e lê os arquivos da pasta
+// retorna Ok(lang) caso ache uma linguagem suportada
+// retorna Err() caso não identifique a linguagem ou receba algum outro erro no caminho
+fn language(path: &'static str) -> Result<&'static str, Box<dyn std::error::Error>> {
     let mut depends = DependencyManagers::new();
     depends.dependency_managers.insert("cargo.toml", "rust");
     depends.dependency_managers.insert("go.mod", "go");
-    let path = ".";
     let dir = fs::read_dir(path)?;
     let mut lang: &str = "";
     for file in dir {
@@ -36,5 +41,5 @@ fn language() -> Result<&'static str, Box<dyn std::error::Error>> {
     }
 }
 fn main() {
-    println!("{:?}", language())
+    println!("{:?}", language("."))
 }
