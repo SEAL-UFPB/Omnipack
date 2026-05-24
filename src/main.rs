@@ -8,7 +8,7 @@ impl<'a> DependencyManagers<'a> {
     fn new() -> Self {
         Self {
             // instanciando com capacidade 2 devido à quantidade de linguagens suportadas atualmente
-            dependency_managers: HashMap::with_capacity(2),
+            dependency_managers: HashMap::with_capacity(4),
         }
     }
 }
@@ -20,6 +20,8 @@ fn language(path: &'static str) -> Result<&'static str, Box<dyn std::error::Erro
     let mut depends = DependencyManagers::new();
     depends.dependency_managers.insert("cargo.toml", "rust");
     depends.dependency_managers.insert("go.mod", "go");
+    depends.dependency_managers.insert("pyproject.toml", "python");
+    depends.dependency_managers.insert("CMakeLists.txt", "c++");
     let dir = fs::read_dir(path)?;
     let mut lang: &str = "";
     for file in dir {
@@ -40,6 +42,27 @@ fn language(path: &'static str) -> Result<&'static str, Box<dyn std::error::Erro
         Ok(lang)
     }
 }
+
+// Tenta da o match numa linguagem suportada e devolve o cmd pra compilar o projeto
+fn get_build_command(lang: &str) -> &'static str 
+{
+    match lang
+    {
+        "rust" => "cargo build --release",
+        "go" => "go build -v",
+        "python" => "python -m venv venv",
+        "c++" => "cmake --build build --config Release",
+        _ => "echo 'Comando de build não foi encontrado'",
+    }
+}
+
 fn main() {
-    println!("{:?}", language("."))
+    match language(".") 
+    {
+        Ok(lang) => {
+            println!("Linguagem foi identificada: {}", lang);
+            println!("Comando de compilação sugerido: {}", get_build_command(lang));
+        },
+        Err(e) => println!("Erro ao detectar: {}", e),
+    }
 }
